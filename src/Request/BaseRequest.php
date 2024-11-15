@@ -51,26 +51,31 @@ abstract class BaseRequest implements RequestInterface
      */
     public function call()
     {
-        // Creazione del client Guzzle con configurazione di base
         $client = new Client([
-            'base_uri' => 'https://api.brt.it/rest/v1/', // Cambiato base_url in base_uri
-            'timeout'  => 10.0
+            'base_uri' => 'https://api.brt.it/rest/v1/', // Usa 'base_uri', non 'base_url'
+            'timeout' => 10.0,
         ]);
 
-        // Creazione della richiesta direttamente usando request() di Guzzle
-        $response = $client->request($this->method, $this->endpoint, [
-            'json' => $this->createRequestBody() // Dati JSON della richiesta
-        ]);
+        try {
+            // Esegui la richiesta direttamente con `request`
+            $response = $client->request($this->method, $this->endpoint, [
+                'json' => $this->createRequestBody(), // Dati della richiesta in formato JSON
+            ]);
 
-        // Decodifica del corpo della risposta JSON
-        $responseData = json_decode($response->getBody(), true); // true per ottenere un array associativo
+            $responseBody = $response->getBody()->getContents(); // Ottieni il corpo della risposta
 
-        // Verifica se la risposta non è un JSON valido
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidJsonException(json_last_error_msg(), json_last_error());
+            // Decodifica il JSON della risposta
+            $decodedResponse = json_decode($responseBody, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new InvalidJsonException(json_last_error_msg(), json_last_error());
+            }
+
+            return $decodedResponse; // Ritorna la risposta decodificata
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            // Gestisci eventuali errori nella richiesta
+            throw new \Exception('Errore nella richiesta: ' . $e->getMessage(), $e->getCode());
         }
-
-        return $responseData;
     }
 
     public function toArray()
