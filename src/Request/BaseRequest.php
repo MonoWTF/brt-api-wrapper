@@ -62,16 +62,17 @@ abstract class BaseRequest implements RequestInterface
                 'json' => $this->createRequestBody(), // Dati della richiesta in formato JSON
             ]);
 
-            $responseBody = $response->getBody()->getContents(); // Ottieni il corpo della risposta
-
-            // Decodifica il JSON della risposta
-            $decodedResponse = json_decode($responseBody, true);
+            $responseBody = json_decode($response->getBody(), true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new InvalidJsonException(json_last_error_msg(), json_last_error());
             }
 
-            return $decodedResponse; // Ritorna la risposta decodificata
+            // Converti l'array in un oggetto
+            $responseObject = json_decode(json_encode($responseBody), false);
+
+            return $responseObject;
+
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             // Gestisci eventuali errori nella richiesta
             throw new \Exception('Errore nella richiesta: ' . $e->getMessage(), $e->getCode());
