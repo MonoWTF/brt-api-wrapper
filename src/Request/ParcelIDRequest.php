@@ -16,19 +16,29 @@ class ParcelIDRequest extends BaseRequest
     {
         $client = new Client();
 
-        $request = $client->createRequest($this->method, 'https://api.brt.it/rest/v1/' . $this->endpoint . '/' . $parcelID);
-        $request->addHeader('userID', $this->account['userID']);
-        $request->addHeader('password', $this->account['password']);
+        try {
+            $response = $client->request($this->method, 'https://api.brt.it/rest/v1/' . $this->endpoint . $parcelID, [
+                'headers' => [
+                    'userID' => $this->account['userID'],
+                    'password' => $this->account['password'],
+                ],
+            ]);
 
-        $response = $client->send($request);
+            $responseBody = json_decode($response->getBody(), true);
 
-        $response = json_decode($response->getBody());
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new InvalidJsonException(json_last_error_msg(), json_last_error());
+            }
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidJsonException(json_last_error_msg(), json_last_error());
+            // Converti l'array in un oggetto
+            $responseObject = json_decode(json_encode($responseBody), false);
+
+            return $responseObject;
+
+        } catch (\Exception $e) {
+            // Puoi gestire qui l'errore specifico
+            throw $e;
         }
-
-        return new ParcelIDResponse($response);
     }
 
 }
