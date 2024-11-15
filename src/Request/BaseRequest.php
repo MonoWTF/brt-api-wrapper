@@ -51,24 +51,26 @@ abstract class BaseRequest implements RequestInterface
      */
     public function call()
     {
+        // Creazione del client Guzzle con configurazione di base
         $client = new Client([
-            'base_url' => 'https://api.brt.it/rest/v1/',
-            'timeout' => 10.0
+            'base_uri' => 'https://api.brt.it/rest/v1/', // Cambiato base_url in base_uri
+            'timeout'  => 10.0
         ]);
 
-        $request = $client->createRequest($this->method, $this->endpoint, [
-            'json' => $this->createRequestBody()
+        // Creazione della richiesta direttamente usando request() di Guzzle
+        $response = $client->request($this->method, $this->endpoint, [
+            'json' => $this->createRequestBody() // Dati JSON della richiesta
         ]);
 
-        $response = $client->send($request);
+        // Decodifica del corpo della risposta JSON
+        $responseData = json_decode($response->getBody(), true); // true per ottenere un array associativo
 
-        $response = json_decode($response->getBody());
-
+        // Verifica se la risposta non è un JSON valido
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new InvalidJsonException(json_last_error_msg(), json_last_error());
         }
 
-        return $response;
+        return $responseData;
     }
 
     public function toArray()
