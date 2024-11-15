@@ -29,6 +29,7 @@ class BaseResponse
 
     public function __construct($response)
     {
+        dd($response);
         foreach ($response->{$this->rootElement} as $key => $value) {
             if (property_exists($this, $key)) {
                 switch ($key) {
