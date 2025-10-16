@@ -21,13 +21,8 @@
         "test": "vendor/bin/phpunit",
         "phpcs": "vendor/bin/phpcs --extensions=php src tests"
     },
-    "config": {
-        "platform": {
-            "php": "5.4.45"
-        }
-    },
     "require": {
-        "php": ">=5.4 <8",
+        "php": "^8.1 || ^8.2 || ^8.3 || ^8.4",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.5"
     },
